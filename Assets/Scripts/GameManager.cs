@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     public Light[] lights;
     public AudioSource powerOutSound;
     public AudioSource animatronicSong;
+    public AudioSource glitchSound;
     public GameObject mainAnimatronic;
     public GameObject leftAnimatronic;
     public GameObject rightAnimatronic;
@@ -90,6 +91,10 @@ public class GameManager : MonoBehaviour
         
         for (int i = 0; i < glitchCount; i++)
         {
+            if (glitchSound != null)
+            {
+                glitchSound.Play();
+            }
             glitchScreen.SetActive(true);
             yield return new WaitForSeconds(Random.Range(0.05f, 0.15f));
             glitchScreen.SetActive(false);
