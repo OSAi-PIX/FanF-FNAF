@@ -12,9 +12,15 @@ public class GameManager : MonoBehaviour
     public Text powerText;
     public Image powerBar;
     public GameObject blackoutScreen;
+    public GameObject glitchScreen;
     public Light[] lights;
     public AudioSource powerOutSound;
+    public AudioSource animatronicSong;
+    public GameObject mainAnimatronic;
+    public GameObject leftAnimatronic;
+    public GameObject rightAnimatronic;
     private bool powerOutTriggered = false;
+    private bool flickerTriggered = false;
 
     void Awake()
     {
@@ -36,6 +42,11 @@ public class GameManager : MonoBehaviour
             UpdatePowerUI();
         }
         
+        if (powerLevel <= 2 && !flickerTriggered)
+        {
+            FlickerLights();
+        }
+
         if (powerLevel <= 0 && !isGameOver && !powerOutTriggered)
         {
             TriggerPowerShutdown();
@@ -47,9 +58,44 @@ public class GameManager : MonoBehaviour
         powerLevel = Mathf.Max(0, powerLevel - amount);
     }
 
+    void FlickerLights()
+    {
+        flickerTriggered = true;
+        StartCoroutine(FlickerEffect());
+    }
+
+    IEnumerator FlickerEffect()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            foreach (Light light in lights)
+            {
+                light.enabled = !light.enabled;
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
     public void TriggerPowerShutdown()
     {
         powerOutTriggered = true;
+        StartCoroutine(GlitchSequence());
+    }
+
+    IEnumerator GlitchSequence()
+    {
+        float glitchTime = 2.7f;
+        float interval = 0.3f;
+        int glitchCount = (int)(glitchTime / interval);
+        
+        for (int i = 0; i < glitchCount; i++)
+        {
+            glitchScreen.SetActive(true);
+            yield return new WaitForSeconds(Random.Range(0.05f, 0.15f));
+            glitchScreen.SetActive(false);
+            yield return new WaitForSeconds(interval);
+        }
+        
         blackoutScreen.SetActive(true);
         foreach (Light light in lights)
         {
@@ -59,7 +105,19 @@ public class GameManager : MonoBehaviour
         {
             powerOutSound.Play();
         }
-        Invoke("TriggerGameOver", 5f); // Delay game over for dramatic effect
+        if (animatronicSong != null)
+        {
+            animatronicSong.Play();
+        }
+        leftAnimatronic.SetActive(true);
+        rightAnimatronic.SetActive(true);
+        Invoke("TriggerJumpscare", 8f); // Animatronics sing before jumpscare
+    }
+
+    public void TriggerJumpscare()
+    {
+        mainAnimatronic.SetActive(true);
+        Invoke("TriggerGameOver", 2f);
     }
 
     public void TriggerGameOver()
