@@ -1,1 +1,2 @@
 # FanF-FNAF
+This is a fan made Five nights at Freddy's horror game. It is based off the original games by Scott Cawthorn which I give all credit to for the sounds, idea, gameplay, and pretty much everything for the game. This game does have its own lore based of the Original games. Its based in the 2000s where a barely known resturaunt/pizzarea/part/arcade place pops up in Northwest Carolina. It was popular among the children at that time, but something always seemed off... Like something else was there. Something mysterious and evil. -WILL FINISH SOON!
