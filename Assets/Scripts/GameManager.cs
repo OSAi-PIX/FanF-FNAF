@@ -20,8 +20,14 @@ public class GameManager : MonoBehaviour
     public GameObject mainAnimatronic;
     public GameObject leftAnimatronic;
     public GameObject rightAnimatronic;
+    public int currentNight = 1;
+    public Text nightText;
+    public GameObject loreCutscene;
     private bool powerOutTriggered = false;
     private bool flickerTriggered = false;
+    private bool nightCompleted = false;
+    private float nightDuration = 360f; // 6 minutes per night
+    private float nightTimer;
 
     void Awake()
     {
@@ -35,12 +41,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        nightTimer = nightDuration;
+        UpdateNightUI();
+    }
+
     void Update()
     {
-        if (!isGameOver)
+        if (!isGameOver && !nightCompleted)
         {
             ReducePower(powerDrainRate * Time.deltaTime);
             UpdatePowerUI();
+            nightTimer -= Time.deltaTime;
+            
+            if (nightTimer <= 0)
+            {
+                CompleteNight();
+            }
         }
         
         if (powerLevel <= 2 && !flickerTriggered)
@@ -116,7 +134,7 @@ public class GameManager : MonoBehaviour
         }
         leftAnimatronic.SetActive(true);
         rightAnimatronic.SetActive(true);
-        Invoke("TriggerJumpscare", 8f); // Animatronics sing before jumpscare
+        Invoke("TriggerJumpscare", 8f);
     }
 
     public void TriggerJumpscare()
@@ -131,12 +149,40 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("GameOver");
     }
 
-    void UpdatePowerUI()
+    void CompleteNight()
     {
-        if (powerText != null)
-            powerText.text = "Power: " + Mathf.RoundToInt(powerLevel) + "%";
+        nightCompleted = true;
+        currentNight++;
+        if (currentNight > 6)
+        {
+            SceneManager.LoadScene("VictoryScene");
+        }
+        else
+        {
+            StartCoroutine(PlayLoreCutscene());
+        }
+    }
 
-        if (powerBar != null)
-            powerBar.fillAmount = powerLevel / 100f;
+    IEnumerator PlayLoreCutscene()
+    {
+        loreCutscene.SetActive(true);
+        yield return new WaitForSeconds(10f); // Adjust cutscene duration
+        loreCutscene.SetActive(false);
+        ResetNight();
+    }
+
+    void ResetNight()
+    {
+        nightCompleted = false;
+        powerLevel = 100f;
+        nightTimer = nightDuration;
+        SceneManager.LoadScene("Night" + currentNight);
+        UpdateNightUI();
+    }
+
+    void UpdateNightUI()
+    {
+        if (nightText != null)
+            nightText.text = "Night " + currentNight;
     }
 }
